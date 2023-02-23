@@ -4,6 +4,8 @@ require 'slim'
 require 'sqlite3'
 require 'bcrypt'
 
+enable :sessions
+
 get('/') do 
     slim(:register)
 end 
@@ -26,9 +28,12 @@ post('/post/new') do
     title = params[:title]
     content = params[:content]
     tags = params[:tags]
+    user_id = session[:id]
+    # @current_user = db.execute('SELECT name FROM user WHERE id = ?', user_id)
+    puts @current_user
     p "vi får in datan #{title}, #{content}, #{tags}"
     db = SQLite3::Database.new("db/forum.db")
-    db.execute("INSERT INTO post(Title, Content, Tags) VALUES (?,?,?)", title, content, tags)
+    db.execute("INSERT INTO post(Title, Content, Tags, user_id) VALUES (?,?,?,?)", title, content, tags, user_id)
     redirect('/post')
 end
 
@@ -44,15 +49,18 @@ post('/login') do
     db = SQLite3::Database.new('db/forum.db')
     db.results_as_hash = true
     result = db.execute("SELECT * FROM user WHERE name = ?", name).first
-    password = result["password"]
-    id = result["id"]
+    if result
+        pwdigest = result["pwdigest"]
+        id = result["id"]
   
-    if BCrypt::Password.new(password) == password 
-      session[:id] = id
-      redirect('/post')
-      
+        if BCrypt::Password.new(pwdigest) == password 
+            session[:id] = id
+            redirect('/post')     
+        else
+            "Wrong password or user doesn't exist"
+        end
     else
-      "Wrong password or user doesn't exist"
+        "You have to create an account first! lol"
     end
   
   end
@@ -75,3 +83,7 @@ post('/users/new') do
     end
   
   end 
+
+  get('/user/new') do 
+    slim(:register)
+  end
