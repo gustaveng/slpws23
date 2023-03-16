@@ -5,14 +5,17 @@ html lang="en"
         meta http-equiv="X-UA-Compatible" content="IE=edge"/
         meta name="viewport" content="width=device-width, initial-scale=1.0"/
         title Document
+        link rel="stylesheet" href="css/style.css"/
     body 
-        h1 
-            a href="/" Forum Website
-        
-        h3 
-            ul  
-                    a href="/login" Log in 
+        nav
             ul
-                  a href="/user/new" Create account
+                    a href="/post" Forum Website
 
+                    a href="/your_post" Profile
+                
+                    a href="/post/new" Create new  
+                
+                    a href="/post" All posts 
+                
+                    a href="/logout" Log out 
         ==yield

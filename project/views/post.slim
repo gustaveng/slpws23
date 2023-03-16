@@ -1,10 +1,16 @@
 h1 All posts
 
-h3  
-    a href="post/new" Create new post
+h3      
+/ p = @result
 
-p=@result
+- @result.each do |result|
+    ul
+            p 
+                h2 #{result["title"]}
+            textarea = result["content"]
+            p Tag: #{result["tags"]}
+            p Admin: #{result["role"]}
+            p Posted by: #{result["name"]}
 
-h2 All your posts #{@current_user}
 
-/ - todos.each do |todo|
+

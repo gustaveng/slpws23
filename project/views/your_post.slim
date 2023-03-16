@@ -1,0 +1,20 @@
+br
+br
+
+/ form action="post" method="POST"
+/     textarea placeholder="Har du något kul och dela med dig? Skriv ditt inlägg här då :)" name="post" cols="30" rows="10"
+/     br
+/     input.submit_button type="submit" value="Lägg ut"/ 
+
+h1 These are your posts!
+
+-@result.each do |post|
+  p = post["title"]
+  textarea = post["content"] 
+  form method="POST" action="/your_post/#{post['id']}/delete"
+    input type="submit" value="Delete"
+  form method="POST" action="/your_post/#{post['id']}/update"
+    input type="text" name="edit_post" value=post["content"]
+    input type="submit" value="Update"
+  br
+  br

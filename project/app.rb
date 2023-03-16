@@ -6,17 +6,42 @@ require 'bcrypt'
 
 enable :sessions
 
-get('/') do 
-    slim(:register)
-end 
+before do
+    db = SQLite3::Database.new("db/forum.db")
+    if !session[:id].nil?
+      session[:name] = db.execute("SELECT name FROM user WHERE id = ?", [session[:id]]).first
+    else
+      redirect('/login') unless ['/login', '/users/new'].include?(request.path_info)
+    end
+  end
+  
+  get('/') do
+    redirect('/login')
+  end
+
 
 get('/post') do 
+    authorized?
     db = SQLite3::Database.new("db/forum.db")
-    @result = db.execute("SELECT * FROM post")
     db.results_as_hash = true
-
+    @result = db.execute("SELECT post.title, post.content, post.tags, user.name, user.role FROM post INNER JOIN user ON post.user_id=user.id")
     slim(:post)
-end 
+  end
+
+  get('/your_post') do 
+    authorized?
+    id = session[:id].to_i
+    db = SQLite3::Database.new("db/forum.db")
+    db.results_as_hash = true
+    @result = db.execute("SELECT * FROM post WHERE user_id = ?", id)
+    slim(:your_post)
+  end
+
+  get('/logout') do
+    session[:id] = nil
+    redirect('/login')
+  end
+
 
 
 get('/post/new') do 
@@ -39,7 +64,7 @@ end
 
 get('/login') do 
 
-slim(:login)
+slim(:login, layout:false)
 end
 
 
@@ -66,24 +91,38 @@ post('/login') do
   end
 
 
-post('/users/new') do 
+  post('/users/new') do 
     name = params[:name]
     password = params[:password]
     password_confirm = params[:password_confirm]
   
-    if (password == password_confirm )
+    if password == password_confirm
       password = BCrypt::Password.create(password)
       db = SQLite3::Database.new('db/forum.db')
-      db.execute("INSERT INTO user (name,password) VALUES (?,?)", name, password)
+      db.execute("INSERT INTO user (name, pwdigest) VALUES (?,?)", name, password)
       redirect('/')
-  
     else
-  
-      "username and password dont match"
+      "username and password don't match"
     end
+  end
   
-  end 
-
-  get('/user/new') do 
+  get('/users/new') do 
     slim(:register)
   end
+  
+
+  post('/your_post/:id/delete') do 
+    id = params[:id].to_i
+    db = SQLite3::Database.new("db/forum.db")
+    db.execute("DELETE FROM post WHERE id = ?", id)
+    redirect ('/your_post')
+  end
+ 
+  post('/your_post/:id/update') do 
+    id = params[:id].to_i
+    content = params[:edit_post]
+    db = SQLite3::Database.new("db/forum.db")
+    db.execute("UPDATE post SET content = ? WHERE id = ?", content, id)
+    redirect ('/your_post')
+  end
+  
