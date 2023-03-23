@@ -3,7 +3,6 @@ require 'sinatra/reloader'
 require 'slim'
 require 'sqlite3'
 require 'bcrypt'
-
 enable :sessions
 
 before do
@@ -19,9 +18,8 @@ before do
     redirect('/login')
   end
 
-
 get('/post') do 
-    authorized?
+    # authorized?
     db = SQLite3::Database.new("db/forum.db")
     db.results_as_hash = true
     @result = db.execute("SELECT post.title, post.content, post.tags, user.name, user.role FROM post INNER JOIN user ON post.user_id=user.id")
@@ -29,7 +27,7 @@ get('/post') do
   end
 
   get('/your_post') do 
-    authorized?
+    # authorized?
     id = session[:id].to_i
     db = SQLite3::Database.new("db/forum.db")
     db.results_as_hash = true
@@ -41,8 +39,6 @@ get('/post') do
     session[:id] = nil
     redirect('/login')
   end
-
-
 
 get('/post/new') do 
     slim(:postnew)
@@ -63,10 +59,8 @@ post('/post/new') do
 end
 
 get('/login') do 
-
 slim(:login, layout:false)
 end
-
 
 post('/login') do
     name = params[:name]
@@ -85,11 +79,9 @@ post('/login') do
             "Wrong password or user doesn't exist"
         end
     else
-        "You have to create an account first! lol"
+        "You have to create an account first!"
     end
-  
   end
-
 
   post('/users/new') do 
     name = params[:name]
@@ -107,9 +99,8 @@ post('/login') do
   end
   
   get('/users/new') do 
-    slim(:register)
+    slim(:register, layout:false)
   end
-  
 
   post('/your_post/:id/delete') do 
     id = params[:id].to_i
