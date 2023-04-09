@@ -19,7 +19,6 @@ before do
   end
 
 get('/post') do 
-    # authorized?
     db = SQLite3::Database.new("db/forum.db")
     db.results_as_hash = true
     @result = db.execute("SELECT post.title, post.content, post.tags, user.name, user.role FROM post INNER JOIN user ON post.user_id=user.id")
@@ -27,7 +26,7 @@ get('/post') do
   end
 
   get('/your_post') do 
-    # authorized?
+
     id = session[:id].to_i
     db = SQLite3::Database.new("db/forum.db")
     db.results_as_hash = true
